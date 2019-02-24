@@ -9,18 +9,25 @@ def load_csv(filename):
     return dataset
 
 def str_column_to_float(dataset, column):
-    for row in dataset:
+    iterdata=iter(dataset)
+    next(iterdata)
+    for row in iterdata:
         row[column] = float(row[column].strip())
 
 def str_column_to_integer(dataset,column):
     list = []
-    for row in dataset:
+    iterdata = iter(dataset)
+    next(iterdata)
+    for row in iterdata:
         list.append(row[column])
     tmp = set(list)
     dictio = dict()
 
     for i, value in enumerate(tmp):
         dictio[value] = i
-    for row in dataset:
+
+    iterdata = iter(dataset)
+    next(iterdata)
+    for row in iterdata:
         row[column] = dictio[row[column]]
     return dictio
