@@ -6,6 +6,8 @@ import ExtractData as ExD
 from sklearn.svm import SVC
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.axes as AX
+import makeplot as mp
 
 dataFileDir = "IRIS_DATA/"
 dataFileName = "iris.csv"
@@ -20,7 +22,7 @@ y_name="sepal_width"
 
 
 dataset = f.load_csv(dataFileDir+dataFileName)
-DataColumnName=dataset[0];
+DataColumnName=dataset[0]
 
 
 for column in range(len(dataset[0])-1):
@@ -31,27 +33,32 @@ label = f.str_column_to_integer(dataset, 4)
 formData=ExD.ExData(dataset, label)
 formData.extractTrainData(DataColumnName.index(x_name), DataColumnName.index(y_name))
 
-X = np.array(formData.TrainSetosa + formData.TrainVirginica)
-Y = np.array(formData.trainLabelSetosa + formData.trainLabelVirginica)
-clf = SVC(kernel="linear")
+X = np.array(formData.TrainSetosa + formData.TrainVirginica + formData.TrainVersicolor)
+Y = np.array(formData.trainLabelSetosa + formData.trainLabelVirginica + formData.trainLabelVersicolor)
+clf = SVC(kernel="rbf", C=2,degree=5)
 clf.fit(X, Y)
 
 
-xs = [x[0] for x in X]
-ys = [x[1] for x in X]
-
-data = (formData.TrainSetosa, formData.TrainVirginica)
-colors = ("red", "green")
-groups = ("Setos", "TrainVirginica")
+data = (formData.TrainSetosa, formData.TrainVirginica, formData.TrainVersicolor)
+groups = ("Setos", "Virginica","Versicolor")
 
 # Create plot
 #fig = plt.figure()
 #ax = fig.add_subplot(1, 1, 1, axisbg="1.0")
+xx, yy = mp.make_meshgrid(X, X)
+Z = clf.predict(np.c_[xx.ravel(), yy.ravel()])
+Z = Z.reshape(yy.shape)
 
-for data, color, group in zip(data, colors, groups):
-    x, y = data
-    plt.scatter(x, y, alpha=0.8, c=color, edgecolors='none', s=30, label=group)
+t=0
+for data, group in zip(data, groups):
+    x, y = zip(*data)
+    plt.contourf(xx, yy, Z, cmap=plt.cm.coolwarm, alpha=0.8)
+    plt.scatter(x, y, alpha=0.8, cmap=plt.cm.coolwarm, edgecolors='k', s=30, label=group)
+    t=t+1
 
+print(t)
+plt.ylim(min(y)-1, max(y)+1)
+plt.xlim(min(x)-1, max(x)+1)
 plt.ylabel(y_name)
 plt.xlabel(x_name)
 plt.title('iris_map')
